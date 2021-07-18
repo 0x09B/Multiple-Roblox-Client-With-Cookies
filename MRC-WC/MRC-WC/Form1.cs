@@ -12,6 +12,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Diagnostics;
+using System.Configuration;
 
 namespace MRC_WC
 {
@@ -19,7 +20,9 @@ namespace MRC_WC
     {
         private static string[] cookies = null;
         private static string gameid = string.Empty;
+        private static int clients = 0; 
         private static int maxclients;
+        private static string auth = string.Empty;
         private string currentapp_path = Directory.GetCurrentDirectory();
 
         public Form1()
@@ -36,29 +39,17 @@ namespace MRC_WC
             return null;
         }
 
-        private int getrobloxcount()
-        {
-            int launched = 0;
-            Process[] robloxs = Process.GetProcessesByName("RobloxPlayerBeta");
-            foreach (Process process in robloxs)
-            {
-                launched += 1;   
-            }
-            return launched;
-        }
-
-
-        private void LaunchRoblox(string authcode)
+        private string LaunchRoblox(string authcode)
         {
             Random rnd = new Random();
             long browserTrackerId = 55393295400 + rnd.Next(1, 100);
             TimeSpan t = (DateTime.UtcNow - new DateTime(1970, 1, 1));
             int launchTime = (int)t.TotalSeconds * 1000;
-            string url = $@"roblox-player:1+launchmode:play+gameinfo:{authcode}+launchtime:{launchTime}+placelauncherurl:https://assetgame.roblox.com/game/PlaceLauncher.ashx?request=RequestGame&browserTrackerId="+ browserTrackerId + "&placeId={"+ gameid +"}&isPlayTogetherGame=false+browsertrackerid:{"+ browserTrackerId +"}+robloxLocale:en_us+gameLocale:en_us";
-            System.Diagnostics.Process.Start(url);
+
+            string url = $@"roblox-player:1+launchmode:play+gameinfo:{authcode}+launchtime:{launchTime}+placelauncherurl:https://assetgame.roblox.com/game/PlaceLauncher.ashx?request=RequestGame&browserTrackerId="+browserTrackerId+"&placeId="+gameid+"&isPlayTogetherGame=false+browsertrackerid:"+browserTrackerId+"+robloxLocale:en_us+gameLocale:en_us";
+
+            return url;
         }
-
-
 
         private async void Visit(string cookie)
         {
@@ -76,21 +67,19 @@ namespace MRC_WC
                     request2.Headers.Add("Referer", "https://www.roblox.com/develop");
                     request2.Headers.Add("RBX-For-Gameauth", "true");
 
-                using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer, AllowAutoRedirect = false })
+                    using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer, AllowAutoRedirect = false })
                     using (var client = new HttpClient(handler))
                     {
                         cookieContainer.Add(baseAddress, new Cookie(".ROBLOSECURITY", cookie));
                         var result = await client.SendAsync(request);
                         var xcsrf = (String[])result.Headers.GetValues("X-CSRF-TOKEN");
-                        output("Got X-CSRF Token:" + xcsrf[0]);
 
                         request2.Headers.Add("X-CSRF-TOKEN", xcsrf[0]);
                         result = await client.SendAsync(request2);
                         var authcode = (String[])result.Headers.GetValues("rbx-authentication-ticket");
-                        output("Got Auth Token:" + authcode[0]);
-                        LaunchRoblox(authcode[0]);
-                }
 
+                        auth = authcode[0];
+                    }
 
                 }
                 catch (Exception exc)
@@ -98,12 +87,6 @@ namespace MRC_WC
                     output("Failed to connect, Trying again! ");
                 }
         }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -114,20 +97,17 @@ namespace MRC_WC
                 {
                     cookiespath_tb.AppendText(openFileDialog.FileName);
                     cookies = File.ReadAllLines(openFileDialog.FileName);
-
                     output("Added cookies!");
                 }
                 else if (dialog != DialogResult.OK)
                     output("Cookies were not added!");
         }
 
-        
 
 
         private void start_bt(object sender, EventArgs e)
         {
             Process[] pname = Process.GetProcessesByName("multi");
-
 
             maxclients = int.Parse(clients_tb.Text);
             gameid = gameid_tb.Text;
@@ -136,28 +116,38 @@ namespace MRC_WC
                 output("Please add cookies!");
             else
             {
-                if (pname.Length == 0)
-                    System.Diagnostics.Process.Start(currentapp_path + @"\multi.exe");
-                else
-                    output("Multi roblox already running, starting process!");
-
-
-                Thread.Sleep(2000);
-
-                try
+                if (File.Exists(currentapp_path + @"\multi.exe"))
                 {
-                    for (int clients = getrobloxcount(); clients < maxclients; clients++)
+                    if (pname.Length == 0)
+                        System.Diagnostics.Process.Start(currentapp_path + @"\multi.exe");
+                    else
+                        output("Multi roblox already running, starting process!");
+
+                    Thread.Sleep(2000);
+
+                    try
                     {
-                        Visit(cookies[clients]);
-                        output("Current clients: " + clients);
+                        for (int clients = 0; clients < maxclients;)
+                        {
+                            Visit(cookies[clients]);
+                            var game = Process.Start(LaunchRoblox(auth));
+                            output("Got X-CSRF Token!");
+                            output("Got Auth Token!");
+                            game.WaitForExit();
+
+                            clients++;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        return;
                     }
                 }
-                catch (Exception ex)
+                else
                 {
-                    return;
+                    MessageBox.Show("Missing multi.exe, if you lose it, download it from source again!", "Missing a file", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
         }
 
 
@@ -168,6 +158,7 @@ namespace MRC_WC
             {
                 process.Kill();
                 process.WaitForExit();
+
             }
         }
     }
