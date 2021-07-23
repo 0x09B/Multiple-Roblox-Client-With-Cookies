@@ -20,9 +20,7 @@ namespace MRC_WC
     {
         private static string[] cookies = null;
         private static string gameid = string.Empty;
-        private static int clients = 0; 
         private static int maxclients;
-        private static string auth = string.Empty;
         private string currentapp_path = Directory.GetCurrentDirectory();
 
         public Form1()
@@ -46,46 +44,46 @@ namespace MRC_WC
             TimeSpan t = (DateTime.UtcNow - new DateTime(1970, 1, 1));
             int launchTime = (int)t.TotalSeconds * 1000;
 
-            string url = $@"roblox-player:1+launchmode:play+gameinfo:{authcode}+launchtime:{launchTime}+placelauncherurl:https://assetgame.roblox.com/game/PlaceLauncher.ashx?request=RequestGame&browserTrackerId="+browserTrackerId+"&placeId="+gameid+"&isPlayTogetherGame=false+browsertrackerid:"+browserTrackerId+"+robloxLocale:en_us+gameLocale:en_us";
+            string url = $@"roblox-player:1+launchmode:play+gameinfo:{authcode}+launchtime:{launchTime}+placelauncherurl:https://assetgame.roblox.com/game/PlaceLauncher.ashx?request=RequestGame&browserTrackerId=" + browserTrackerId + "&placeId=" + gameid + "&isPlayTogetherGame=false+browsertrackerid:" + browserTrackerId + "+robloxLocale:en_us+gameLocale:en_us";
 
             return url;
         }
 
-        private async void Visit(string cookie)
+        public async Task<string> Visit(string cookie)
         {
-                try
+            try
+            {
+                var baseAddress = new Uri("https://auth.roblox.com/v1/authentication-ticket/");
+                var cookieContainer = new CookieContainer();
+                var request = new HttpRequestMessage(HttpMethod.Post, baseAddress);
+                request.Headers.Add("User-Agent", "Roblox/WinInet");
+                request.Headers.Add("Referer", "https://www.roblox.com/develop");
+                request.Headers.Add("RBX-For-Gameauth", "true");
+
+                var request2 = new HttpRequestMessage(HttpMethod.Post, baseAddress);
+                request2.Headers.Add("User-Agent", "Roblox/WinInet");
+                request2.Headers.Add("Referer", "https://www.roblox.com/develop");
+                request2.Headers.Add("RBX-For-Gameauth", "true");
+
+                using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer, AllowAutoRedirect = false })
+                using (var client = new HttpClient(handler))
                 {
-                    var baseAddress = new Uri("https://auth.roblox.com/v1/authentication-ticket/");
-                    var cookieContainer = new CookieContainer();
-                    var request = new HttpRequestMessage(HttpMethod.Post, baseAddress);
-                    request.Headers.Add("User-Agent", "Roblox/WinInet");
-                    request.Headers.Add("Referer", "https://www.roblox.com/develop");
-                    request.Headers.Add("RBX-For-Gameauth", "true");
+                    cookieContainer.Add(baseAddress, new Cookie(".ROBLOSECURITY", cookie));
+                    var result = await client.SendAsync(request);
+                    var xcsrf = (String[])result.Headers.GetValues("X-CSRF-TOKEN");
 
-                    var request2 = new HttpRequestMessage(HttpMethod.Post, baseAddress);
-                    request2.Headers.Add("User-Agent", "Roblox/WinInet");
-                    request2.Headers.Add("Referer", "https://www.roblox.com/develop");
-                    request2.Headers.Add("RBX-For-Gameauth", "true");
-
-                    using (var handler = new HttpClientHandler() { CookieContainer = cookieContainer, AllowAutoRedirect = false })
-                    using (var client = new HttpClient(handler))
-                    {
-                        cookieContainer.Add(baseAddress, new Cookie(".ROBLOSECURITY", cookie));
-                        var result = await client.SendAsync(request);
-                        var xcsrf = (String[])result.Headers.GetValues("X-CSRF-TOKEN");
-
-                        request2.Headers.Add("X-CSRF-TOKEN", xcsrf[0]);
-                        result = await client.SendAsync(request2);
-                        var authcode = (String[])result.Headers.GetValues("rbx-authentication-ticket");
-
-                        auth = authcode[0];
-                    }
-
+                    request2.Headers.Add("X-CSRF-TOKEN", xcsrf[0]);
+                    result = await client.SendAsync(request2);
+                    var authcode = (String[])result.Headers.GetValues("rbx-authentication-ticket");
+                    return authcode[0];
                 }
-                catch (Exception exc)
-                {
-                    output("Failed to connect, Trying again! ");
-                }
+
+            }
+            catch (Exception exc)
+            {
+                output(exc.ToString());
+            }
+            return "";
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -93,19 +91,19 @@ namespace MRC_WC
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Text documents (*.txt*)|*.txt*";
             var dialog = openFileDialog.ShowDialog();
-                if (dialog == DialogResult.OK)
-                {
-                    cookiespath_tb.AppendText(openFileDialog.FileName);
-                    cookies = File.ReadAllLines(openFileDialog.FileName);
-                    output("Added cookies!");
-                }
-                else if (dialog != DialogResult.OK)
-                    output("Cookies were not added!");
+            if (dialog == DialogResult.OK)
+            {
+                cookiespath_tb.AppendText(openFileDialog.FileName);
+                cookies = File.ReadAllLines(openFileDialog.FileName);
+                output("Added cookies!");
+            }
+            else if (dialog != DialogResult.OK)
+                output("Cookies were not added!");
         }
 
 
 
-        private void start_bt(object sender, EventArgs e)
+        private async void start_bt(object sender, EventArgs e)
         {
             Process[] pname = Process.GetProcessesByName("multi");
 
@@ -129,12 +127,16 @@ namespace MRC_WC
                     {
                         for (int clients = 0; clients < maxclients;)
                         {
-                            Visit(cookies[clients]);
-                            var game = Process.Start(LaunchRoblox(auth));
-                            output("Got X-CSRF Token!");
-                            output("Got Auth Token!");
+                            Thread.Sleep(2000);
+                            var task1 = Visit(cookies[clients]);
+                            var results = await Task.WhenAll(task1);
+                            output("Got token");
+                            var game = Process.Start(LaunchRoblox(results[0]));
+                            output("Launched");
                             game.WaitForExit();
+                            output("Done");
 
+                            this.Text = "MRC - WC | Clients: " + (clients+1).ToString();
                             clients++;
                         }
                     }
