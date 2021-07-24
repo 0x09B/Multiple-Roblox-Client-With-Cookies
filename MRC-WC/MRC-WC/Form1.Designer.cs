@@ -113,7 +113,7 @@ namespace MRC_WC
             // 
             // start_btn
             // 
-            this.start_btn.Location = new System.Drawing.Point(132, 19);
+            this.start_btn.Location = new System.Drawing.Point(135, 33);
             this.start_btn.Name = "start_btn";
             this.start_btn.Size = new System.Drawing.Size(75, 52);
             this.start_btn.TabIndex = 7;

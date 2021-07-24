@@ -70,17 +70,28 @@ namespace MRC_WC
                 {
                     cookieContainer.Add(baseAddress, new Cookie(".ROBLOSECURITY", cookie));
                     var result = await client.SendAsync(request);
-                    var xcsrf = (String[])result.Headers.GetValues("X-CSRF-TOKEN");
 
-                    request2.Headers.Add("X-CSRF-TOKEN", xcsrf[0]);
-                    result = await client.SendAsync(request2);
-                    var authcode = (String[])result.Headers.GetValues("rbx-authentication-ticket");
-                    return authcode[0];
+
+
+                    if (result.Headers.Contains("X-CSRF-TOKEN"))
+                    {
+                        var xcsrf = (String[])result.Headers.GetValues("X-CSRF-TOKEN");
+                        request2.Headers.Add("X-CSRF-TOKEN", xcsrf[0]);
+                        result = await client.SendAsync(request2);
+                        var authcode = (String[])result.Headers.GetValues("rbx-authentication-ticket");
+                        return authcode[0];
+                    }
+                    else
+                    {
+                        output("Your cookie is not valid");
+                        return "false";
+                    }
                 }
 
             }
             catch (Exception exc)
             {
+  
                 output(exc.ToString());
             }
             return "";
@@ -130,14 +141,24 @@ namespace MRC_WC
                             Thread.Sleep(2000);
                             var task1 = Visit(cookies[clients]);
                             var results = await Task.WhenAll(task1);
-                            output("Got token");
-                            var game = Process.Start(LaunchRoblox(results[0]));
-                            output("Launched");
-                            game.WaitForExit();
-                            output("Done");
+                            if (!(results[0] == "false"))
+                            {
 
-                            this.Text = "MRC - WC | Clients: " + (clients+1).ToString();
-                            clients++;
+
+                                output("Got token");
+                                var game = Process.Start(LaunchRoblox(results[0]));
+                                output("Launched");
+                                game.WaitForExit();
+                                output("Done");
+
+                                this.Text = "MRC - WC | Clients: " + (clients + 1).ToString();
+                                clients++;
+                            }
+                            else
+                            {
+                                clients = maxclients;
+                                continue;
+                            }
                         }
                     }
                     catch (Exception ex)
