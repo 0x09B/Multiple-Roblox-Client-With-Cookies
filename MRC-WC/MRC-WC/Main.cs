@@ -16,25 +16,26 @@ using System.Configuration;
 
 namespace MRC_WC
 {
-    public partial class Form1 : Form
+    public partial class Main : Form
     {
+        static Main instance = null;
+        Mutex robloxMutex = new Mutex(true, "ROBLOX_singletonMutex");
+        public OpenFileDialog openFileDialog = new OpenFileDialog();
         private static string[] cookies = null;
         private static string gameid = string.Empty;
         private static int maxclients;
         private string currentapp_path = Directory.GetCurrentDirectory();
+        public static string pathofcookies = "";
 
-        public Form1()
+        public Main()
         {
             InitializeComponent();
+            instance = this;
         }
 
-        private string output(string arg)
+        public static void output(string arg)
         {
-            Invoke((Action)delegate
-            {
-                output_tb.AppendText(arg + "\r\n");
-            });
-            return null;
+                instance.output_tb.AppendText(arg + "\r\n");
         }
 
         private string LaunchRoblox(string authcode)
@@ -97,14 +98,15 @@ namespace MRC_WC
             return "";
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        public void button1_Click(object sender, EventArgs e)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog();
+
             openFileDialog.Filter = "Text documents (*.txt*)|*.txt*";
             var dialog = openFileDialog.ShowDialog();
             if (dialog == DialogResult.OK)
             {
                 cookiespath_tb.AppendText(openFileDialog.FileName);
+                pathofcookies = openFileDialog.FileName;
                 cookies = File.ReadAllLines(openFileDialog.FileName);
                 output("Added cookies!");
             }
@@ -114,10 +116,8 @@ namespace MRC_WC
 
 
 
-        private async void start_bt(object sender, EventArgs e)
+        public async void start_bt(object sender, EventArgs e)
         {
-            Process[] pname = Process.GetProcessesByName("multi");
-
             maxclients = int.Parse(clients_tb.Text);
             gameid = gameid_tb.Text;
 
@@ -125,15 +125,10 @@ namespace MRC_WC
                 output("Please add cookies!");
             else
             {
-                if (File.Exists(currentapp_path + @"\multi.exe"))
-                {
-                    if (pname.Length == 0)
-                        System.Diagnostics.Process.Start(currentapp_path + @"\multi.exe");
-                    else
-                        output("Multi roblox already running, starting process!");
+                cookies = File.ReadAllLines(openFileDialog.FileName);
 
+                if (cookies.Length > 0) {
                     Thread.Sleep(2000);
-
                     try
                     {
                         for (int clients = 0; clients < maxclients;)
@@ -141,10 +136,8 @@ namespace MRC_WC
                             Thread.Sleep(2000);
                             var task1 = Visit(cookies[clients]);
                             var results = await Task.WhenAll(task1);
-                            if (!(results[0] == "false"))
+                            if (!(results[0] == "false") && !String.IsNullOrEmpty(results[0]))
                             {
-
-
                                 output("Got token");
                                 var game = Process.Start(LaunchRoblox(results[0]));
                                 output("Launched");
@@ -168,7 +161,7 @@ namespace MRC_WC
                 }
                 else
                 {
-                    MessageBox.Show("Missing multi.exe, if you lose it, download it from source again!", "Missing a file", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    output("Cant find cookies inside file");
                 }
             }
         }
@@ -176,13 +169,7 @@ namespace MRC_WC
 
         private void Form1_FormClosing(object sender, FormClosedEventArgs e)
         {
-            Process[] pname = Process.GetProcessesByName("multi");
-            foreach (Process process in pname)
-            {
-                process.Kill();
-                process.WaitForExit();
-
-            }
+            robloxMutex.Close();
         }
     }
 }

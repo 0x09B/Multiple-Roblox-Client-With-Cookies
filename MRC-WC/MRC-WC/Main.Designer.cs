@@ -1,7 +1,7 @@
 ﻿
 namespace MRC_WC
 {
-    partial class Form1
+    partial class Main
     {
         /// <summary>
         /// Обязательная переменная конструктора.
@@ -29,7 +29,7 @@ namespace MRC_WC
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Main));
             this.label1 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.cookiespath_tb = new System.Windows.Forms.TextBox();
@@ -113,9 +113,9 @@ namespace MRC_WC
             // 
             // start_btn
             // 
-            this.start_btn.Location = new System.Drawing.Point(135, 33);
+            this.start_btn.Location = new System.Drawing.Point(120, 22);
             this.start_btn.Name = "start_btn";
-            this.start_btn.Size = new System.Drawing.Size(75, 52);
+            this.start_btn.Size = new System.Drawing.Size(59, 49);
             this.start_btn.TabIndex = 7;
             this.start_btn.Text = "Start";
             this.start_btn.UseVisualStyleBackColor = true;
@@ -124,7 +124,7 @@ namespace MRC_WC
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(223, 3);
+            this.label4.Location = new System.Drawing.Point(182, 3);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(42, 13);
             this.label4.TabIndex = 9;
@@ -133,7 +133,7 @@ namespace MRC_WC
             // output_tb
             // 
             this.output_tb.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.output_tb.Location = new System.Drawing.Point(226, 19);
+            this.output_tb.Location = new System.Drawing.Point(185, 22);
             this.output_tb.Multiline = true;
             this.output_tb.Name = "output_tb";
             this.output_tb.ReadOnly = true;
@@ -141,14 +141,14 @@ namespace MRC_WC
             this.output_tb.Size = new System.Drawing.Size(184, 124);
             this.output_tb.TabIndex = 10;
             // 
-            // Form1
+            // Main
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnablePreventFocusChange;
-            this.ClientSize = new System.Drawing.Size(422, 162);
+            this.ClientSize = new System.Drawing.Size(377, 162);
             this.Controls.Add(this.output_tb);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.start_btn);
@@ -161,10 +161,9 @@ namespace MRC_WC
             this.Controls.Add(this.label1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MaximizeBox = false;
-            this.Name = "Form1";
+            this.Name = "Main";
             this.Text = "Multiple Roblox Client - With Cookies";
             this.TopMost = true;
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosing);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -181,7 +180,7 @@ namespace MRC_WC
         private System.Windows.Forms.TextBox clients_tb;
         private System.Windows.Forms.Button start_btn;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox output_tb;
+        public System.Windows.Forms.TextBox output_tb;
     }
 }
 

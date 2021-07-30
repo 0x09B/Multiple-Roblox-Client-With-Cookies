@@ -1,0 +1,10 @@
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\bin\Release\MRC-WC.exe.config
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\bin\Release\MRC-WC.exe
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\bin\Release\MRC-WC.pdb
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC-WC.csproj.AssemblyReference.cache
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC_WC.Properties.Resources.resources
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC-WC.csproj.GenerateResource.cache
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC-WC.csproj.CoreCompileInputs.cache
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC-WC.exe
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC-WC.pdb
+C:\Users\XE\Documents\GitHub\Multiple-Roblox-Client-Joiner-With-Cookies\MRC-WC\MRC-WC\obj\Release\MRC_WC.Main.resources
